@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Manage Users - Dealer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="d-flex">
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">🤝</span><div><h5>MedSystem</h5><small>Dealer Panel</small></div></div>
+        <div class="sidebar-menu">
+            <a th:href="@{/dealer/dashboard}"><span class="menu-icon">🏠</span> Dashboard</a>
+            <a th:href="@{/dealer/stock}"><span class="menu-icon">📦</span> My Stock</a>
+            <a th:href="@{/dealer/buy}"><span class="menu-icon">🛒</span> Buy from Admin</a>
+            <a th:href="@{/dealer/supply}"><span class="menu-icon">🚚</span> Supply to Users</a>
+            <a th:href="@{/dealer/users}" class="active"><span class="menu-icon">👥</span> Manage Users</a>
+            <a th:href="@{/dealer/transactions}"><span class="menu-icon">📊</span> Transactions</a>
+            <a th:href="@{/dealer/suggestions}"><span class="menu-icon">💬</span> Suggestions</a>
+            <a th:href="@{/dealer/suggestions/send}"><span class="menu-icon">✉️</span> Send to Admin</a>
+        </div>
+        <div class="sidebar-footer"><form th:action="@{/logout}" method="post"><button type="submit" class="btn btn-sm btn-outline-light w-100">🚪 Logout</button></form></div>
+    </nav>
+    <div class="main-content">
+        <div class="topbar"><span class="topbar-title">👥 Manage Hospitals &amp; Medical Shops</span></div>
+        <div class="content-area">
+            <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
+            <div th:if="${errorMsg}" class="alert alert-danger" th:text="${errorMsg}"></div>
+
+            <!-- Pending -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark fw-bold">⏳ Pending Approvals</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th>Licence No</th><th>Name</th><th>Type</th><th>Email</th><th>Mobile</th><th>District</th><th>Actions</th></tr></thead>
+                        <tbody>
+                        <tr th:each="u : ${pendingUsers}">
+                            <td th:text="${u.licenceNumber}"></td>
+                            <td th:text="${u.fullName}"></td>
+                            <td><span th:class="${u.role.name() == 'HOSPITAL'} ? 'role-badge role-hospital' : 'role-badge role-shop'" th:text="${u.role}"></span></td>
+                            <td th:text="${u.email}"></td>
+                            <td th:text="${u.mobileNumber}"></td>
+                            <td th:text="${u.district}"></td>
+                            <td>
+                                <a th:href="@{/dealer/users/approve/{id}(id=${u.id})}" class="btn btn-sm btn-success">✅ Approve</a>
+                                <a th:href="@{/dealer/users/reject/{id}(id=${u.id})}" class="btn btn-sm btn-danger ms-1">❌ Reject</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(pendingUsers)}">
+                            <td colspan="7" class="text-center text-muted py-3">No pending approvals</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Approved Hospitals -->
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white fw-bold">🏥 Approved Hospitals</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th>Licence No</th><th>Name</th><th>Email</th><th>Mobile</th><th>District</th></tr></thead>
+                        <tbody>
+                        <tr th:each="h : ${approvedHospitals}">
+                            <td th:text="${h.licenceNumber}"></td>
+                            <td th:text="${h.fullName}"></td>
+                            <td th:text="${h.email}"></td>
+                            <td th:text="${h.mobileNumber}"></td>
+                            <td th:text="${h.district}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(approvedHospitals)}">
+                            <td colspan="5" class="text-center text-muted py-3">No approved hospitals</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Approved Medical Shops -->
+            <div class="card">
+                <div class="card-header bg-info text-dark fw-bold">🏪 Approved Medical Shops</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th>Licence No</th><th>Name</th><th>Email</th><th>Mobile</th><th>District</th></tr></thead>
+                        <tbody>
+                        <tr th:each="s : ${approvedShops}">
+                            <td th:text="${s.licenceNumber}"></td>
+                            <td th:text="${s.fullName}"></td>
+                            <td th:text="${s.email}"></td>
+                            <td th:text="${s.mobileNumber}"></td>
+                            <td th:text="${s.district}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(approvedShops)}">
+                            <td colspan="5" class="text-center text-muted py-3">No approved medical shops</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

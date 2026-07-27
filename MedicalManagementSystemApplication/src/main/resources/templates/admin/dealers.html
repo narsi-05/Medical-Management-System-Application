@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dealers - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="d-flex">
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">🏥</span><div><h5>MedSystem</h5><small>Admin Panel</small></div></div>
+        <div class="sidebar-menu">
+            <a th:href="@{/admin/dashboard}"><span class="menu-icon">🏠</span> Dashboard</a>
+            <a th:href="@{/admin/medicines}"><span class="menu-icon">💊</span> Medicines</a>
+            <a th:href="@{/admin/requests}"><span class="menu-icon">📋</span> Purchase Requests</a>
+            <a th:href="@{/admin/supply}"><span class="menu-icon">🚚</span> Supply to Dealer</a>
+            <a th:href="@{/admin/dealers}" class="active"><span class="menu-icon">🤝</span> Manage Dealers</a>
+            <a th:href="@{/admin/users}"><span class="menu-icon">👥</span> All Users</a>
+            <a th:href="@{/admin/transactions}"><span class="menu-icon">📊</span> Transactions</a>
+            <a th:href="@{/admin/suggestions}"><span class="menu-icon">💬</span> Suggestions</a>
+        </div>
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-sm btn-outline-light w-100">🚪 Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="topbar"><span class="topbar-title">🤝 Manage Dealers</span></div>
+        <div class="content-area">
+            <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
+            <div th:if="${errorMsg}" class="alert alert-danger" th:text="${errorMsg}"></div>
+
+            <!-- Pending Dealers -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark fw-bold">⏳ Pending Dealer Approvals</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th>Licence No</th><th>Name</th><th>Email</th><th>Mobile</th><th>District</th><th>Actions</th></tr></thead>
+                        <tbody>
+                        <tr th:each="d : ${pendingDealers}">
+                            <td th:text="${d.licenceNumber}"></td>
+                            <td th:text="${d.fullName}"></td>
+                            <td th:text="${d.email}"></td>
+                            <td th:text="${d.mobileNumber}"></td>
+                            <td th:text="${d.district}"></td>
+                            <td>
+                                <a th:href="@{/admin/dealers/approve/{id}(id=${d.id})}" class="btn btn-sm btn-success">✅ Approve</a>
+                                <a th:href="@{/admin/dealers/reject/{id}(id=${d.id})}" class="btn btn-sm btn-danger ms-1">❌ Reject</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(pendingDealers)}">
+                            <td colspan="6" class="text-center text-muted py-3">No pending dealer approvals</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- All Dealers -->
+            <div class="card">
+                <div class="card-header bg-success text-white fw-bold">✅ All Dealers</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th>Licence No</th><th>Name</th><th>Email</th><th>Mobile</th><th>District</th><th>Status</th></tr></thead>
+                        <tbody>
+                        <tr th:each="d : ${allDealers}">
+                            <td th:text="${d.licenceNumber}"></td>
+                            <td th:text="${d.fullName}"></td>
+                            <td th:text="${d.email}"></td>
+                            <td th:text="${d.mobileNumber}"></td>
+                            <td th:text="${d.district + ', ' + d.state}"></td>
+                            <td>
+                                <span th:class="${d.approvalStatus.name() == 'APPROVED'} ? 'badge bg-success' : (${d.approvalStatus.name() == 'REJECTED'} ? 'badge bg-danger' : 'badge bg-warning')"
+                                      th:text="${d.approvalStatus}"></span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(allDealers)}">
+                            <td colspan="6" class="text-center text-muted py-3">No dealers registered</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

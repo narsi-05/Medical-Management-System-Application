@@ -1,0 +1,17 @@
+# Render does not offer a managed MySQL database, so this app now expects
+# an external MySQL instance (e.g. PlanetScale, Aiven, AWS RDS, your own server).
+# Set the values below in the Render dashboard as environment variables.
+services:
+  - type: web
+    name: medical-management-system
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://<your-mysql-host>:3306/medical_db?useSSL=false&serverTimezone=UTC
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false

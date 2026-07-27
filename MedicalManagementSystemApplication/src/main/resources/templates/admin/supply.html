@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Supply - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="d-flex">
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">🏥</span><div><h5>MedSystem</h5><small>Admin Panel</small></div></div>
+        <div class="sidebar-menu">
+            <a th:href="@{/admin/dashboard}"><span class="menu-icon">🏠</span> Dashboard</a>
+            <a th:href="@{/admin/medicines}"><span class="menu-icon">💊</span> Medicines</a>
+            <a th:href="@{/admin/supply}" class="active"><span class="menu-icon">🚚</span> Supply to Dealer</a>
+            <a th:href="@{/admin/dealers}"><span class="menu-icon">🤝</span> Manage Dealers</a>
+            <a th:href="@{/admin/users}"><span class="menu-icon">👥</span> All Users</a>
+            <a th:href="@{/admin/transactions}"><span class="menu-icon">📊</span> Transactions</a>
+            <a th:href="@{/admin/suggestions}"><span class="menu-icon">💬</span> Suggestions</a>
+        </div>
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-sm btn-outline-light w-100">🚪 Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="topbar"><span class="topbar-title">🚚 Supply Medicine to Dealer</span></div>
+        <div class="content-area">
+            <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
+            <div th:if="${errorMsg}" class="alert alert-danger" th:text="${errorMsg}"></div>
+
+            <div class="form-section">
+                <h5>📦 Supply Medicine</h5>
+                <form th:action="@{/admin/supply}" method="post">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Select Dealer *</label>
+                            <select name="dealerId" class="form-select" required>
+                                <option value="">-- Select Dealer --</option>
+                                <option th:each="d : ${dealers}" th:value="${d.id}"
+                                        th:text="${d.fullName + ' (' + d.licenceNumber + ')'}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Select Medicine *</label>
+                            <select name="medicineId" class="form-select" required>
+                                <option value="">-- Select Medicine --</option>
+                                <option th:each="m : ${medicines}" th:value="${m.id}"
+                                        th:text="${m.name + ' (Stock: ' + m.quantity + ')'}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Quantity *</label>
+                            <input type="number" name="quantity" class="form-control" min="1" placeholder="Enter quantity" required>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">🚚 Supply Now</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-info text-dark">💊 Available Medicines Stock</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th>Name</th><th>Category</th><th>Stock</th><th>Price</th></tr></thead>
+                        <tbody>
+                        <tr th:each="m : ${medicines}">
+                            <td th:text="${m.name}"></td>
+                            <td th:text="${m.category}"></td>
+                            <td><span th:class="${m.lowStock} ? 'badge bg-danger' : 'badge bg-success'"
+                                      th:text="${m.quantity}"></span></td>
+                            <td th:text="${'₹' + m.price}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

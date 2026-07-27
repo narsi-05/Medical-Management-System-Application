@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Buy Medicines</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .request-card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: transform 0.15s;
+        }
+        .request-card:hover { transform: translateY(-2px); }
+        .status-pending  { background: #fff3cd; color: #856404;  border-left: 4px solid #ffc107; }
+        .status-approved { background: #d1e7dd; color: #0f5132;  border-left: 4px solid #198754; }
+        .status-rejected { background: #f8d7da; color: #842029;  border-left: 4px solid #dc3545; }
+        .med-option-price { font-size:0.78rem; color:#6c757d; }
+    </style>
+</head>
+<body>
+<div class="d-flex">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">🏥</span>
+            <div><h5>MedSystem</h5><small>User Panel</small></div>
+        </div>
+        <div class="sidebar-menu">
+            <a th:href="@{/user/dashboard}"><span class="menu-icon">🏠</span> Dashboard</a>
+            <a th:href="@{/user/medicines}"><span class="menu-icon">💊</span> View Medicines</a>
+            <a th:href="@{/user/buy}" class="active"><span class="menu-icon">🛒</span> Buy / Request</a>
+            <a th:href="@{/user/stock}"><span class="menu-icon">📦</span> My Stock</a>
+            <a th:href="@{/user/transactions}"><span class="menu-icon">📊</span> Transactions</a>
+            <a th:href="@{/user/suggestions}"><span class="menu-icon">💬</span> Send Suggestion</a>
+        </div>
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-sm btn-outline-light w-100">🚪 Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="topbar">
+            <span class="topbar-title">🛒 Buy Medicines from Dealer</span>
+        </div>
+
+        <div class="content-area">
+
+            <!-- Alerts -->
+            <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${successMsg}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMsg}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${errorMsg}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- REQUEST FORM -->
+            <div class="form-section mb-4">
+                <h5>📋 Place a Medicine Request</h5>
+                <p class="text-muted small mb-3">Select a dealer, choose the medicine and quantity. The dealer will review and approve your request.</p>
+
+                <form th:action="@{/user/buy/request}" method="post">
+                    <div class="row g-3">
+                        <!-- Dealer -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Select Dealer <span class="text-danger">*</span></label>
+                            <select name="dealerId" id="dealerSelect" class="form-select" required>
+                                <option value="">-- Choose Dealer --</option>
+                                <option th:each="d : ${dealers}"
+                                        th:value="${d.id}"
+                                        th:text="${d.fullName + ' (' + d.licenceNumber + ')'}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Medicine -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Select Medicine <span class="text-danger">*</span></label>
+                            <select name="medicineId" class="form-select" required>
+                                <option value="">-- Choose Medicine --</option>
+                                <option th:each="m : ${medicines}"
+                                        th:value="${m.id}"
+                                        th:text="${m.name + ' | ₹' + m.price + ' | Stock: ' + m.quantity}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Quantity <span class="text-danger">*</span></label>
+                            <input type="number" name="quantity" class="form-control"
+                                   min="1" placeholder="e.g. 100" required>
+                        </div>
+
+                        <!-- Note -->
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Note <span class="text-muted">(optional)</span></label>
+                            <input type="text" name="note" class="form-control" placeholder="Any note...">
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary px-4">
+                                📤 Send Request to Dealer
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- MY REQUESTS LIST -->
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <span>📋 My Medicine Requests</span>
+                    <span class="badge bg-light text-dark"
+                          th:text="${myRequests.size()} + ' total'"></span>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(myRequests)}" class="text-center text-muted py-5">
+                        <div style="font-size:3rem;">📭</div>
+                        <p>No requests yet. Place your first request above!</p>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(myRequests)}" class="p-3">
+                        <div th:each="req : ${myRequests}" class="mb-3 p-3 rounded request-card"
+                             th:classappend="${req.status.name() == 'PENDING'} ? 'status-pending' :
+                                            (${req.status.name() == 'APPROVED'} ? 'status-approved' : 'status-rejected')">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <div class="fw-bold fs-6" th:text="${req.medicine.name}"></div>
+                                    <div class="small text-muted">
+                                        Category: <span th:text="${req.medicine.category}"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="small fw-semibold">Dealer</div>
+                                    <div class="small" th:text="${req.dealer.fullName}"></div>
+                                    <div class="small text-muted" th:text="${req.dealer.licenceNumber}"></div>
+                                </div>
+                                <div class="col-md-1 text-center">
+                                    <div class="small fw-semibold">Qty</div>
+                                    <div class="fw-bold fs-5" th:text="${req.requestedQuantity}"></div>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <div class="small fw-semibold">Amount</div>
+                                    <div class="fw-bold"
+                                         th:text="${'₹' + #numbers.formatDecimal(req.medicine.price * req.requestedQuantity, 1, 2)}">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <span th:if="${req.status.name() == 'PENDING'}"
+                                          class="badge bg-warning text-dark fs-6">⏳ Pending</span>
+                                    <span th:if="${req.status.name() == 'APPROVED'}"
+                                          class="badge bg-success fs-6">✅ Approved</span>
+                                    <span th:if="${req.status.name() == 'REJECTED'}"
+                                          class="badge bg-danger fs-6">❌ Rejected</span>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <div class="small text-muted"
+                                         th:text="${#temporals.format(req.requestedAt,'dd MMM yyyy')}"></div>
+                                    <div th:if="${req.dealerRemark}" class="small mt-1">
+                                        💬 <em th:text="${req.dealerRemark}"></em>
+                                    </div>
+                                    <div th:if="${req.note}" class="small text-muted mt-1">
+                                        📝 <span th:text="${req.note}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /content-area -->
+    </div><!-- /main-content -->
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

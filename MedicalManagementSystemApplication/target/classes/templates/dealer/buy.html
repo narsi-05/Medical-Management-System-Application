@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Buy from Admin - Dealer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .request-card { border-radius:12px; border:none; box-shadow:0 2px 12px rgba(0,0,0,0.08); transition:transform 0.15s; }
+        .request-card:hover { transform:translateY(-2px); }
+        .status-pending  { background:#fff3cd; color:#856404; border-left:4px solid #ffc107; }
+        .status-approved { background:#d1e7dd; color:#0f5132; border-left:4px solid #198754; }
+        .status-rejected { background:#f8d7da; color:#842029; border-left:4px solid #dc3545; }
+    </style>
+</head>
+<body>
+<div class="d-flex">
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">🤝</span><div><h5>MedSystem</h5><small>Dealer Panel</small></div></div>
+        <div class="sidebar-menu">
+            <a th:href="@{/dealer/dashboard}"><span class="menu-icon">🏠</span> Dashboard</a>
+            <a th:href="@{/dealer/stock}"><span class="menu-icon">📦</span> My Stock</a>
+            <a th:href="@{/dealer/buy}" class="active"><span class="menu-icon">🛒</span> Buy from Admin</a>
+            <a th:href="@{/dealer/requests}"><span class="menu-icon">📋</span> Medicine Requests</a>
+            <a th:href="@{/dealer/supply}"><span class="menu-icon">🚚</span> Supply to Users</a>
+            <a th:href="@{/dealer/users}"><span class="menu-icon">👥</span> Manage Users</a>
+            <a th:href="@{/dealer/transactions}"><span class="menu-icon">📊</span> Transactions</a>
+            <a th:href="@{/dealer/suggestions}"><span class="menu-icon">💬</span> Suggestions</a>
+            <a th:href="@{/dealer/suggestions/send}"><span class="menu-icon">✉️</span> Send to Admin</a>
+        </div>
+        <div class="sidebar-footer"><form th:action="@{/logout}" method="post"><button type="submit" class="btn btn-sm btn-outline-light w-100">🚪 Logout</button></form></div>
+    </nav>
+    <div class="main-content">
+        <div class="topbar"><span class="topbar-title">🛒 Buy Medicines from Admin</span></div>
+        <div class="content-area">
+
+            <!-- Alerts -->
+            <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${successMsg}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMsg}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${errorMsg}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- PURCHASE REQUEST FORM -->
+            <div class="form-section mb-4">
+                <h5>📋 Place a Purchase Request to Admin</h5>
+                <p class="text-muted small mb-3">Select a medicine and quantity. The Admin will review and approve your request, then supply it to your stock.</p>
+                <form th:action="@{/dealer/buy/request}" method="post">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold">Select Medicine <span class="text-danger">*</span></label>
+                            <select name="medicineId" class="form-select" required>
+                                <option value="">-- Choose Medicine --</option>
+                                <option th:each="m : ${medicines}"
+                                        th:value="${m.id}"
+                                        th:text="${m.name + ' | ₹' + m.price + ' | Admin Stock: ' + m.quantity}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Quantity <span class="text-danger">*</span></label>
+                            <input type="number" name="quantity" class="form-control" min="1" placeholder="e.g. 100" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Note <span class="text-muted">(optional)</span></label>
+                            <input type="text" name="note" class="form-control" placeholder="Any note...">
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">📤 Request</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Available Medicines Table -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">📦 Available Medicines (Admin Stock)</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th>Medicine</th><th>Category</th><th>Manufacturer</th><th>Available Qty</th><th>Price</th></tr></thead>
+                        <tbody>
+                        <tr th:each="m : ${medicines}">
+                            <td th:text="${m.name}"></td>
+                            <td th:text="${m.category}"></td>
+                            <td th:text="${m.manufacturer}"></td>
+                            <td>
+                                <span th:class="${m.lowStock} ? 'badge bg-danger' : 'badge bg-success'" th:text="${m.quantity}"></span>
+                                <span th:if="${m.lowStock}" class="ms-1 text-danger small">⚠️ Low</span>
+                            </td>
+                            <td th:text="${'₹' + m.price}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(medicines)}">
+                            <td colspan="5" class="text-center text-muted py-4">No medicines available</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MY REQUESTS LIST -->
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <span>📋 My Purchase Requests to Admin</span>
+                    <span class="badge bg-light text-dark" th:text="${myRequests.size()} + ' total'"></span>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(myRequests)}" class="text-center text-muted py-5">
+                        <div style="font-size:3rem;">📭</div>
+                        <p>No requests yet. Place your first request above!</p>
+                    </div>
+                    <div th:if="${!#lists.isEmpty(myRequests)}" class="p-3">
+                        <div th:each="req : ${myRequests}" class="mb-3 p-3 rounded request-card"
+                             th:classappend="${req.status.name() == 'PENDING'} ? 'status-pending' :
+                                            (${req.status.name() == 'APPROVED'} ? 'status-approved' : 'status-rejected')">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <div class="fw-bold fs-6" th:text="${req.medicine.name}"></div>
+                                    <div class="small text-muted">Category: <span th:text="${req.medicine.category}"></span></div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="small fw-semibold">Requested To</div>
+                                    <div class="small">Admin</div>
+                                </div>
+                                <div class="col-md-1 text-center">
+                                    <div class="small fw-semibold">Qty</div>
+                                    <div class="fw-bold fs-5" th:text="${req.requestedQuantity}"></div>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <div class="small fw-semibold">Amount</div>
+                                    <div class="fw-bold" th:text="${'₹' + #numbers.formatDecimal(req.medicine.price * req.requestedQuantity, 1, 2)}"></div>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <span th:if="${req.status.name() == 'PENDING'}" class="badge bg-warning text-dark fs-6">⏳ Pending</span>
+                                    <span th:if="${req.status.name() == 'APPROVED'}" class="badge bg-success fs-6">✅ Approved</span>
+                                    <span th:if="${req.status.name() == 'REJECTED'}" class="badge bg-danger fs-6">❌ Rejected</span>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <div class="small text-muted" th:text="${#temporals.format(req.requestedAt,'dd MMM yyyy')}"></div>
+                                    <div th:if="${req.dealerRemark}" class="small mt-1">💬 <em th:text="${req.dealerRemark}"></em></div>
+                                    <div th:if="${req.note}" class="small text-muted mt-1">📝 <span th:text="${req.note}"></span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

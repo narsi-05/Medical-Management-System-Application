@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Suggestions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="d-flex">
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">🏥</span><div><h5>MedSystem</h5><small>User Panel</small></div></div>
+        <div class="sidebar-menu">
+            <a th:href="@{/user/dashboard}"><span class="menu-icon">🏠</span> Dashboard</a>
+            <a th:href="@{/user/medicines}"><span class="menu-icon">💊</span> View Medicines</a>
+            <a th:href="@{/user/stock}"><span class="menu-icon">📦</span> My Stock</a>
+            <a th:href="@{/user/transactions}"><span class="menu-icon">📊</span> Transactions</a>
+            <a th:href="@{/user/suggestions}" class="active"><span class="menu-icon">💬</span> Send Suggestion</a>
+        </div>
+        <div class="sidebar-footer"><form th:action="@{/logout}" method="post"><button type="submit" class="btn btn-sm btn-outline-light w-100">🚪 Logout</button></form></div>
+    </nav>
+    <div class="main-content">
+        <div class="topbar"><span class="topbar-title">💬 Send Suggestion to Dealer</span></div>
+        <div class="content-area">
+            <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
+
+            <div class="form-section" style="max-width:600px;">
+                <h5>📤 New Suggestion</h5>
+                <form th:action="@{/user/suggestions/send}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Select Dealer *</label>
+                        <select name="dealerId" class="form-select" required>
+                            <option value="">-- Select Dealer --</option>
+                            <option th:each="d : ${dealers}" th:value="${d.id}"
+                                    th:text="${d.fullName + ' (' + d.licenceNumber + ')'}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Subject *</label>
+                        <input type="text" name="subject" class="form-control" placeholder="Brief subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Message *</label>
+                        <textarea name="message" class="form-control" rows="5" placeholder="Write your suggestion..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">📤 Send Suggestion</button>
+                </form>
+            </div>
+
+            <!-- Sent History -->
+            <div class="card mt-4">
+                <div class="card-header bg-secondary text-white">📨 Sent Suggestions</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th>To</th><th>Subject</th><th>Date</th></tr></thead>
+                        <tbody>
+                        <tr th:each="s : ${sent}">
+                            <td th:text="${s.toUser.fullName}"></td>
+                            <td th:text="${s.subject}"></td>
+                            <td th:text="${#temporals.format(s.createdAt,'dd-MM-yyyy HH:mm')}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(sent)}">
+                            <td colspan="3" class="text-center text-muted py-3">No suggestions sent yet</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

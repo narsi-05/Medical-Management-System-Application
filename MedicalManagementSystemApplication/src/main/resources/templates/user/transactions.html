@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Transactions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="d-flex">
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">🏥</span><div><h5>MedSystem</h5><small>User Panel</small></div></div>
+        <div class="sidebar-menu">
+            <a th:href="@{/user/dashboard}"><span class="menu-icon">🏠</span> Dashboard</a>
+            <a th:href="@{/user/medicines}"><span class="menu-icon">💊</span> View Medicines</a>
+            <a th:href="@{/user/stock}"><span class="menu-icon">📦</span> My Stock</a>
+            <a th:href="@{/user/transactions}" class="active"><span class="menu-icon">📊</span> Transactions</a>
+            <a th:href="@{/user/suggestions}"><span class="menu-icon">💬</span> Send Suggestion</a>
+        </div>
+        <div class="sidebar-footer"><form th:action="@{/logout}" method="post"><button type="submit" class="btn btn-sm btn-outline-light w-100">🚪 Logout</button></form></div>
+    </nav>
+    <div class="main-content">
+        <div class="topbar"><span class="topbar-title">📊 My Transactions</span></div>
+        <div class="content-area">
+            <div class="card">
+                <div class="card-header bg-primary text-white">Purchase History</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th>#</th><th>Medicine</th><th>Supplied By</th><th>Qty</th><th>Amount</th><th>Date</th></tr></thead>
+                        <tbody>
+                        <tr th:each="tx,stat : ${transactions}">
+                            <td th:text="${stat.count}"></td>
+                            <td th:text="${tx.medicine.name}"></td>
+                            <td th:text="${tx.fromUser.fullName}"></td>
+                            <td th:text="${tx.quantity}"></td>
+                            <td th:text="${'₹' + #numbers.formatDecimal(tx.totalPrice,1,2)}"></td>
+                            <td th:text="${#temporals.format(tx.transactionDate,'dd-MM-yyyy HH:mm')}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(transactions)}">
+                            <td colspan="6" class="text-center text-muted py-4">No transactions yet</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
