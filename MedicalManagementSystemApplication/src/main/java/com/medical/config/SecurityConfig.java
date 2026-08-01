@@ -46,8 +46,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/register", "/signup", "/login", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/", "/register", "/signup", "/login", "/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/dealer/**").hasRole("DEALER")
                 .requestMatchers("/user/**").hasAnyRole("HOSPITAL", "MEDICAL_SHOP")

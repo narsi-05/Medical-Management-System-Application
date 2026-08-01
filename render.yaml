@@ -10,9 +10,17 @@ services:
     dockerfilePath: MedicalManagementSystemApplication/Dockerfile
     envVars:
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:mysql://<your-mysql-host>:3306/medical_db?useSSL=false&serverTimezone=UTC
+        value: jdbc:mysql://mysql.railway.internal:3306/medical_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
         sync: false
       - key: SPRING_DATASOURCE_USERNAME
+        value: root
         sync: false
       - key: SPRING_DATASOURCE_PASSWORD
+        value: HhOddgSFKTaXTtJejGfcLsRSlSihvWGJ
+        sync: false
+      - key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+        value: com.mysql.cj.jdbc.Driver
+        sync: false
+      - key: SPRING_JPA_DIALECT
+        value: org.hibernate.dialect.MySQLDialect
         sync: false
