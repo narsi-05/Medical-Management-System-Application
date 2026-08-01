@@ -35,7 +35,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setApprovalStatus(User.ApprovalStatus.APPROVED);
             admin.setEnabled(true);
             userRepository.save(admin);
-            System.out.println("✅ Default Admin created: ADMIN001 / admin@123");
+            System.out.println("✅ Default Admin account initialized.");
         }
     }
 }
