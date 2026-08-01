@@ -6,7 +6,8 @@ services:
     name: medical-management-system
     runtime: docker
     plan: free
-    dockerfilePath: ./Dockerfile
+    dockerContext: MedicalManagementSystemApplication
+    dockerfilePath: MedicalManagementSystemApplication/Dockerfile
     envVars:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:mysql://<your-mysql-host>:3306/medical_db?useSSL=false&serverTimezone=UTC
